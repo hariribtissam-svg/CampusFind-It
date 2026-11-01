@@ -17,6 +17,16 @@ from database import User
 CATEGORIES = ["Électronique", "Vêtements", "Clés", "Documents", "Livres", "Sac", "Autre"]
 LIEUX = ["Bibliothèque", "Amphi A", "Amphi B", "Cafétéria", "Résidence", "Labo info", "Parking", "Gymnase"]
 
+# Couleurs de l'application
+BLEU = "#1d4ed8"          # bleu foncé : menu, titres, boutons
+BLEU_CLAIR = "#dbeafe"    # bleu clair : en-têtes des tableaux
+
+
+def bouton(parent, **options):
+    """Crée un bouton bleu avec du texte blanc."""
+    return tk.Button(parent, bg=BLEU, fg="white", activebackground="#1e40af",
+                     activeforeground="white", **options)
+
 
 class LoginWindow(tk.Tk):
     """Fenêtre de connexion / inscription.
@@ -28,7 +38,7 @@ class LoginWindow(tk.Tk):
         self.title("FindIt - Connexion")
         self.geometry("380x430")
 
-        tk.Label(self, text="FindIt", font=("Arial", 22, "bold")).pack(pady=(15, 0))
+        tk.Label(self, text="FindIt", font=("Arial", 22, "bold"), fg=BLEU).pack(pady=(15, 0))
         tk.Label(self, text="Objets perdus et trouvés sur le campus").pack()
 
         # Deux onglets : Connexion et Inscription
@@ -44,7 +54,7 @@ class LoginWindow(tk.Tk):
         self.l_mdp = tk.StringVar()
         self.ajouter_champ(page_connexion, "Email", self.l_email, 0)
         self.ajouter_champ(page_connexion, "Mot de passe", self.l_mdp, 1, cache=True)
-        tk.Button(page_connexion, text="Se connecter", command=self.do_login).grid(
+        bouton(page_connexion, text="Se connecter", command=self.do_login).grid(
             row=2, column=0, columnspan=2, pady=20)
 
         # Onglet inscription
@@ -56,7 +66,7 @@ class LoginWindow(tk.Tk):
         self.ajouter_champ(page_inscription, "Email", self.r_email, 1)
         self.ajouter_champ(page_inscription, "Mot de passe", self.r_pwd, 2, cache=True)
         self.ajouter_champ(page_inscription, "Confirmer", self.r_pwd2, 3, cache=True)
-        tk.Button(page_inscription, text="Créer mon compte", command=self.do_register).grid(
+        bouton(page_inscription, text="Créer mon compte", command=self.do_register).grid(
             row=4, column=0, columnspan=2, pady=20)
 
     def ajouter_champ(self, parent, texte, variable, ligne, cache=False):
@@ -146,8 +156,8 @@ class DeclareForm(tk.Frame):
 
         boutons = tk.Frame(self)
         boutons.grid(row=6, column=1, sticky="w", pady=15)
-        tk.Button(boutons, text="Enregistrer", command=self.submit).pack(side="left", padx=(0, 8))
-        tk.Button(boutons, text="Effacer", command=self.reset).pack(side="left")
+        bouton(boutons, text="Enregistrer", command=self.submit).pack(side="left", padx=(0, 8))
+        bouton(boutons, text="Effacer", command=self.reset).pack(side="left")
 
     def submit(self):
         """Vérifie les champs, puis envoie les données à interface.py."""
@@ -191,14 +201,14 @@ class ClaimDialog(tk.Toplevel):
         super().__init__(parent)
         self.result = None
         self.title("Faire une demande")
-        tk.Label(self, text=f"Objet : {nom_objet}", font=("Arial", 11, "bold")).pack(padx=15, pady=(15, 5))
+        tk.Label(self, text=f"Objet : {nom_objet}", font=("Arial", 11, "bold"), fg=BLEU).pack(padx=15, pady=(15, 5))
         tk.Label(self, text="Décrivez l'objet pour prouver qu'il est à vous :").pack(padx=15)
         self.txt = tk.Text(self, width=45, height=6)
         self.txt.pack(padx=15, pady=10)
         boutons = tk.Frame(self)
         boutons.pack(pady=(0, 15))
-        tk.Button(boutons, text="Envoyer", command=self.send).pack(side="left", padx=5)
-        tk.Button(boutons, text="Annuler", command=self.destroy).pack(side="left", padx=5)
+        bouton(boutons, text="Envoyer", command=self.send).pack(side="left", padx=5)
+        bouton(boutons, text="Annuler", command=self.destroy).pack(side="left", padx=5)
         self.grab_set()                        # bloque la fenêtre principale tant qu'elle est ouverte
 
     def send(self):
