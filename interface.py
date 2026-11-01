@@ -11,7 +11,7 @@ from tkinter import ttk, messagebox
 
 from database import User, objects, restitutions
 from database.connection import get_connection
-from forms import LoginWindow, DeclareForm, ask_claim_message
+from forms import LoginWindow, DeclareForm, ask_claim_message, BLEU, BLEU_CLAIR, bouton
 
 # Couleur du texte selon le statut (objets et demandes)
 COULEURS = {"Perdu": "red", "Trouvé": "orange", "Restitué": "green",
@@ -57,6 +57,12 @@ class App(tk.Tk):
         self.title(f"FindIt - {user['full_name']}")
         self.geometry("1000x620")
 
+        # Style des tableaux : en-têtes bleu clair, ligne sélectionnée en bleu
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure("Treeview.Heading", background=BLEU_CLAIR, font=("Arial", 10, "bold"))
+        style.map("Treeview", background=[("selected", BLEU)], foreground=[("selected", "white")])
+
         self.items = []                       # objets lus dans la base
         self.claims_sent = []                 # mes demandes
         self.claims_recv = []                 # demandes reçues sur mes annonces
@@ -64,13 +70,13 @@ class App(tk.Tk):
         self.filter_var = tk.StringVar(value="Tous")
 
         # Menu du haut
-        menu = tk.Frame(self, bg="#dddddd")
+        menu = tk.Frame(self, bg=BLEU)
         menu.pack(fill="x")
         for nom in ["Accueil", "Objets", "Déclarer", "Demandes", "Restitutions"]:
-            tk.Button(menu, text=nom, width=10,
+            tk.Button(menu, text=nom, width=10, bg="white", fg=BLEU,
                       command=lambda n=nom: self.show_page(n)).pack(side="left", padx=3, pady=5)
-        tk.Button(menu, text="Déconnexion", command=self.logout).pack(side="right", padx=8)
-        tk.Label(menu, text=f"Connecté : {user['full_name']}", bg="#dddddd").pack(side="right", padx=10)
+        tk.Button(menu, text="Déconnexion", bg="white", fg=BLEU, command=self.logout).pack(side="right", padx=8)
+        tk.Label(menu, text=f"Connecté : {user['full_name']}", bg=BLEU, fg="white").pack(side="right", padx=10)
 
         # Zone où s'affichent les pages
         zone = tk.Frame(self)
@@ -100,7 +106,7 @@ class App(tk.Tk):
         self.show_page("Objets")
 
     def titre(self, parent, texte):
-        tk.Label(parent, text=texte, font=("Arial", 18, "bold")).pack(anchor="w", pady=(0, 10))
+        tk.Label(parent, text=texte, font=("Arial", 18, "bold"), fg=BLEU).pack(anchor="w", pady=(0, 10))
 
     # ---------- Les 5 pages ----------
     def page_home(self, p):
@@ -111,7 +117,7 @@ class App(tk.Tk):
         ligne.pack(anchor="w", pady=12)
         self.home_search = tk.StringVar()
         tk.Entry(ligne, textvariable=self.home_search, width=40).pack(side="left", padx=(0, 8))
-        tk.Button(ligne, text="Rechercher",
+        bouton(ligne, text="Rechercher",
                   command=lambda: self.goto_search(self.home_search.get().strip())).pack(side="left")
 
         # Statistiques
@@ -122,12 +128,12 @@ class App(tk.Tk):
                            ("Trouvé", "Trouvés"), ("Restitué", "Restitués")]:
             case = tk.Frame(stats)
             case.pack(side="left", expand=True, pady=10)
-            self.stat_labels[cle] = tk.Label(case, text="0", font=("Arial", 24, "bold"))
+            self.stat_labels[cle] = tk.Label(case, text="0", font=("Arial", 24, "bold"), fg=BLEU)
             self.stat_labels[cle].pack()
             tk.Label(case, text=texte).pack()
 
         # Derniers objets signalés
-        tk.Label(p, text="Derniers objets signalés", font=("Arial", 12, "bold")).pack(anchor="w", pady=(10, 4))
+        tk.Label(p, text="Derniers objets signalés", font=("Arial", 12, "bold"), fg=BLEU).pack(anchor="w", pady=(10, 4))
         cadre, self.recent_tree = creer_tableau(
             p, ("Objet", "Catégorie", "Lieu", "Date", "Statut"), (260, 130, 140, 110, 100))
         self.recent_tree.configure(height=6)
@@ -141,9 +147,9 @@ class App(tk.Tk):
         filtre = ttk.Combobox(barre, textvariable=self.filter_var, state="readonly", width=10,
                               values=["Tous", "Perdu", "Trouvé", "Restitué"])
         filtre.pack(side="left")
-        tk.Button(barre, text="Supprimer", command=self.delete_item).pack(side="right")
-        tk.Button(barre, text="Faire une demande", command=self.make_claim).pack(side="right", padx=8)
-        tk.Button(barre, text="Actualiser", command=self.reload).pack(side="right")
+        bouton(barre, text="Supprimer", command=self.delete_item).pack(side="right")
+        bouton(barre, text="Faire une demande", command=self.make_claim).pack(side="right", padx=8)
+        bouton(barre, text="Actualiser", command=self.reload).pack(side="right")
 
         # La recherche se met à jour à chaque lettre tapée
         self.search_var.trace_add("write", lambda *args: self.refresh())
@@ -172,7 +178,7 @@ class App(tk.Tk):
         # Onglet 1 : les demandes que j'ai envoyées
         barre = tk.Frame(mes_demandes)
         barre.pack(fill="x", pady=8)
-        tk.Button(barre, text="Supprimer ma demande", command=self.delete_claim).pack(side="right")
+        bouton(barre, text="Supprimer ma demande", command=self.delete_claim).pack(side="right")
         cadre, self.sent_tree = creer_tableau(
             mes_demandes, ("Objet", "Message", "Date", "Statut"), (200, 380, 100, 100))
         cadre.pack(fill="both", expand=True)
@@ -180,8 +186,8 @@ class App(tk.Tk):
         # Onglet 2 : les demandes reçues sur mes annonces
         barre = tk.Frame(recues)
         barre.pack(fill="x", pady=8)
-        tk.Button(barre, text="Refuser", command=lambda: self.answer_claim("Refusée")).pack(side="right")
-        tk.Button(barre, text="Accepter", command=lambda: self.answer_claim("Acceptée")).pack(side="right", padx=8)
+        bouton(barre, text="Refuser", command=lambda: self.answer_claim("Refusée")).pack(side="right")
+        bouton(barre, text="Accepter", command=lambda: self.answer_claim("Acceptée")).pack(side="right", padx=8)
         cadre, self.recv_tree = creer_tableau(
             recues, ("Objet", "Demandeur", "Message", "Date", "Statut"), (170, 150, 290, 100, 100))
         cadre.pack(fill="both", expand=True)
